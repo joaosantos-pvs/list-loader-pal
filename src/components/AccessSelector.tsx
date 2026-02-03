@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { accessTypes, AccessType } from "@/data/accessOptions";
+import { accessOptions, AccessType } from "@/data/accessOptions";
 
 interface AccessSelectorProps {
   value: AccessType | "";
@@ -23,9 +23,9 @@ const AccessSelector = ({ value, onChange }: AccessSelectorProps) => {
           <SelectValue placeholder="Selecione uma função" />
         </SelectTrigger>
         <SelectContent>
-          {accessTypes.map((type) => (
-            <SelectItem key={type} value={type}>
-              {type}
+          {accessOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
             </SelectItem>
           ))}
         </SelectContent>
