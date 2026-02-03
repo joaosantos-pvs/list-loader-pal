@@ -5,12 +5,14 @@ import CollaboratorSearch from "@/components/CollaboratorSearch";
 import CollaboratorTable from "@/components/CollaboratorTable";
 import AccessSelector from "@/components/AccessSelector";
 import GroupSelector from "@/components/GroupSelector";
+import MirrorUserSelector from "@/components/MirrorUserSelector";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import SummaryStep from "@/components/SummaryStep";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Home } from "lucide-react";
 import { AccessType } from "@/data/accessOptions";
 import { Collaborator } from "@/data/collaborators";
+import { MirrorUser } from "@/data/mirrorUsers";
 
 interface SelectedGroup {
   name: string;
@@ -22,6 +24,7 @@ const Index = () => {
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [selectedAccess, setSelectedAccess] = useState<AccessType | "">("");
   const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
+  const [selectedMirrorUser, setSelectedMirrorUser] = useState<MirrorUser | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const steps = [
@@ -94,6 +97,15 @@ const Index = () => {
     setCollaborators([]);
     setSelectedAccess("");
     setSelectedGroups([]);
+    setSelectedMirrorUser(null);
+  };
+
+  const handleMirrorUserSelect = (user: MirrorUser | null) => {
+    setSelectedMirrorUser(user);
+  };
+
+  const handleApplyMirrorGroups = (groups: SelectedGroup[]) => {
+    setSelectedGroups(groups);
   };
 
   const canProceedStep1 = collaborators.length > 0;
@@ -139,10 +151,20 @@ const Index = () => {
             />
 
             {selectedAccess && (
-              <GroupSelector
-                selectedGroups={selectedGroups}
-                onGroupsChange={setSelectedGroups}
-              />
+              <>
+                <GroupSelector
+                  selectedGroups={selectedGroups}
+                  onGroupsChange={setSelectedGroups}
+                />
+
+                <div className="border-t border-border pt-6">
+                  <MirrorUserSelector
+                    selectedMirrorUser={selectedMirrorUser}
+                    onMirrorUserSelect={handleMirrorUserSelect}
+                    onApplyGroups={handleApplyMirrorGroups}
+                  />
+                </div>
+              </>
             )}
           </div>
         )}
