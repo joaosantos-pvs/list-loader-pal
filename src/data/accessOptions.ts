@@ -1,11 +1,13 @@
-export const accessTypes = [
-  "Agente light",
-  "Agente Full - Visualiza Relatório",
-  "Agente Full - Criar Relatório",
-  "Agente Full - Sem Relatório",
+export const accessOptions = [
+  { value: "agente_light", label: "Agente light" },
+  { value: "agente_full_visualiza", label: "Agente Full - Visualiza Relatório" },
+  { value: "agente_full_criar", label: "Agente Full - Criar Relatório" },
+  { value: "agente_full_sem", label: "Agente Full - Sem Relatório" },
 ] as const;
 
-export type AccessType = (typeof accessTypes)[number];
+export const accessTypes = accessOptions.map(a => a.value);
+
+export type AccessType = (typeof accessOptions)[number]["value"];
 
 export const groups = [
   "APS - RJ - 001 - Enfermagem",

@@ -1,20 +1,16 @@
 import { useState } from "react";
 import Header from "@/components/Header";
 import StepIndicator from "@/components/StepIndicator";
-import SearchWithImport from "@/components/SearchWithImport";
+import CollaboratorSearch from "@/components/CollaboratorSearch";
 import CollaboratorTable from "@/components/CollaboratorTable";
 import AccessSelector from "@/components/AccessSelector";
 import GroupSelector from "@/components/GroupSelector";
+import ConfirmationModal from "@/components/ConfirmationModal";
+import SummaryStep from "@/components/SummaryStep";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, Lock } from "lucide-react";
+import { ArrowRight, ArrowLeft, Home } from "lucide-react";
 import { AccessType } from "@/data/accessOptions";
-
-interface Collaborator {
-  nome: string;
-  cpf: string;
-  funcaoZendesk: string;
-  status: "ativo" | "pendente" | "erro";
-}
+import { Collaborator } from "@/data/collaborators";
 
 interface SelectedGroup {
   name: string;
@@ -23,10 +19,10 @@ interface SelectedGroup {
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [searchValue, setSearchValue] = useState("");
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [selectedAccess, setSelectedAccess] = useState<AccessType | "">("");
   const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const steps = [
     { number: 1, label: "SELECIONAR COLABORADOR", active: currentStep >= 1 },
@@ -47,7 +43,7 @@ const Index = () => {
         result.push({
           nome: values[0] || "",
           cpf: values[1] || "",
-          funcaoZendesk: values[2] || "Zendesk Administrador",
+          funcaoZendesk: values[2] || "Usuário Final",
           status: "ativo",
         });
       }
@@ -60,32 +56,44 @@ const Index = () => {
     try {
       const content = await file.text();
       const parsed = parseCSV(content);
-      setCollaborators(parsed);
+      setCollaborators((prev) => [...prev, ...parsed]);
     } catch (error) {
       console.error("Erro ao ler arquivo:", error);
     }
+  };
+
+  const handleAddCollaborator = (collaborator: Collaborator) => {
+    setCollaborators((prev) => [...prev, collaborator]);
   };
 
   const handleRemoveCollaborator = (index: number) => {
     setCollaborators((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const filteredCollaborators = collaborators.filter(
-    (c) =>
-      c.nome.toLowerCase().includes(searchValue.toLowerCase()) ||
-      c.cpf.includes(searchValue)
-  );
-
   const handleNext = () => {
-    if (currentStep < 3) {
+    if (currentStep === 2) {
+      setShowConfirmModal(true);
+    } else if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     }
+  };
+
+  const handleConfirm = () => {
+    setShowConfirmModal(false);
+    setCurrentStep(3);
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
+  };
+
+  const handleBackToStart = () => {
+    setCurrentStep(1);
+    setCollaborators([]);
+    setSelectedAccess("");
+    setSelectedGroups([]);
   };
 
   const canProceedStep1 = collaborators.length > 0;
@@ -102,9 +110,9 @@ const Index = () => {
       <main className="max-w-6xl mx-auto px-6 py-8">
         {currentStep === 1 && (
           <div className="bg-card rounded-lg border border-border p-6">
-            <SearchWithImport
-              searchValue={searchValue}
-              onSearchChange={setSearchValue}
+            <CollaboratorSearch
+              selectedCollaborators={collaborators}
+              onAddCollaborator={handleAddCollaborator}
               onFileSelect={handleFileSelect}
             />
 
@@ -117,7 +125,7 @@ const Index = () => {
             </p>
 
             <CollaboratorTable
-              collaborators={filteredCollaborators}
+              collaborators={collaborators}
               onRemove={handleRemoveCollaborator}
             />
           </div>
@@ -140,12 +148,11 @@ const Index = () => {
         )}
 
         {currentStep === 3 && (
-          <div className="bg-card rounded-lg border border-border p-6">
-            <h2 className="text-lg font-semibold mb-4">Resumo</h2>
-            <p className="text-muted-foreground">
-              Tela de resumo será implementada na próxima etapa.
-            </p>
-          </div>
+          <SummaryStep
+            collaborators={collaborators}
+            selectedAccess={selectedAccess as AccessType}
+            selectedGroups={selectedGroups}
+          />
         )}
 
         <p className="text-xs text-muted-foreground mt-6">
@@ -156,7 +163,7 @@ const Index = () => {
         </p>
 
         <div className="flex justify-end gap-3 mt-6">
-          {currentStep > 1 && (
+          {currentStep > 1 && currentStep < 3 && (
             <Button
               variant="outline"
               onClick={handleBack}
@@ -179,13 +186,23 @@ const Index = () => {
           )}
 
           {currentStep === 3 && (
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-              <Lock className="w-4 h-4 mr-2" />
-              CONCLUIR
+            <Button 
+              variant="outline"
+              onClick={handleBackToStart}
+              className="border-border"
+            >
+              <Home className="w-4 h-4 mr-2" />
+              VOLTAR PARA O INÍCIO
             </Button>
           )}
         </div>
       </main>
+
+      <ConfirmationModal
+        open={showConfirmModal}
+        onOpenChange={setShowConfirmModal}
+        onConfirm={handleConfirm}
+      />
     </div>
   );
 };
