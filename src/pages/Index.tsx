@@ -71,17 +71,21 @@ const Index = () => {
     
     // Adicionar ao histórico
     const accessLabel = accessOptions.find(a => a.value === selectedAccess)?.label || selectedAccess;
-    const groupNames = selectedGroups.map(g => g.name);
     
     const entries = [];
     
     // Adicionar colaboradores individuais
     for (const collab of collaborators) {
+      // Simulate random status for demo purposes
+      const statuses = ["success", "error", "not_released"] as const;
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      
       entries.push({
         nome: collab.nome,
         acesso: accessLabel,
-        grupos: groupNames,
-        quemLiberou: "Usuário Atual", // Seria o usuário logado
+        grupos: selectedGroups,
+        quemLiberou: "Usuário Atual",
+        status: randomStatus,
       });
     }
     
@@ -90,10 +94,12 @@ const Index = () => {
       entries.push({
         nome: csvFile.name,
         acesso: accessLabel,
-        grupos: groupNames,
+        grupos: selectedGroups,
         quemLiberou: "Usuário Atual",
+        status: "success" as const,
         isCSV: true,
         csvFileName: csvFile.name,
+        originalFile: csvFile.file,
       });
     }
     
