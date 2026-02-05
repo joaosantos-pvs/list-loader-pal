@@ -1,11 +1,18 @@
 import { Menu, Grid3X3, Plus, Users, Settings } from "lucide-react";
 
-const Header = () => {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+const Header = ({ onMenuClick }: HeaderProps) => {
   return (
     <header className="header-gradient text-primary-foreground">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-4">
-          <button className="p-1 hover:bg-white/10 rounded">
+          <button 
+            onClick={onMenuClick}
+            className="p-1 hover:bg-white/10 rounded"
+          >
             <Menu className="w-5 h-5" />
           </button>
           <span className="font-bold text-lg tracking-wide">PREVENT SENIOR</span>
