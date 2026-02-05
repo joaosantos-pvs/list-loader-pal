@@ -1,4 +1,4 @@
-import { User, MinusCircle } from "lucide-react";
+import { User, MinusCircle, FileText, Loader2 } from "lucide-react";
 import { accessOptions, AccessType } from "@/data/accessOptions";
 
 interface Collaborator {
@@ -8,6 +8,11 @@ interface Collaborator {
   status: "ativo" | "pendente" | "erro";
 }
 
+interface CSVFile {
+  name: string;
+  file: File;
+}
+
 interface SelectedGroup {
   name: string;
   isDefault: boolean;
@@ -15,11 +20,12 @@ interface SelectedGroup {
 
 interface SummaryStepProps {
   collaborators: Collaborator[];
+  csvFile: CSVFile | null;
   selectedAccess: AccessType;
   selectedGroups: SelectedGroup[];
 }
 
-const SummaryStep = ({ collaborators, selectedAccess, selectedGroups }: SummaryStepProps) => {
+const SummaryStep = ({ collaborators, csvFile, selectedAccess, selectedGroups }: SummaryStepProps) => {
   const accessLabel = accessOptions.find(a => a.value === selectedAccess)?.label || selectedAccess;
   
   const groupsDisplay = selectedGroups
@@ -63,6 +69,28 @@ const SummaryStep = ({ collaborators, selectedAccess, selectedGroups }: SummaryS
               </td>
             </tr>
           ))}
+          
+          {csvFile && (
+            <tr className="border-b border-border bg-muted/30">
+              <td className="py-3 px-4">
+                <div className="w-8 h-8 bg-primary/10 rounded flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-primary" />
+                </div>
+              </td>
+              <td className="py-3 px-4 text-sm text-foreground font-medium">
+                {csvFile.name}
+              </td>
+              <td className="py-3 px-4 text-sm text-muted-foreground">
+                Arquivo CSV
+              </td>
+              <td className="py-3 px-4 text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-4 h-4 text-amber-500 animate-spin" />
+                  <span className="text-xs text-amber-500 font-medium">Em processamento</span>
+                </div>
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

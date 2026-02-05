@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Header from "@/components/Header";
+import AppSidebar from "@/components/AppSidebar";
 import StepIndicator from "@/components/StepIndicator";
 import CollaboratorSearch from "@/components/CollaboratorSearch";
 import CollaboratorTable from "@/components/CollaboratorTable";
@@ -10,22 +11,30 @@ import ConfirmationModal from "@/components/ConfirmationModal";
 import SummaryStep from "@/components/SummaryStep";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, Home } from "lucide-react";
-import { AccessType } from "@/data/accessOptions";
+import { AccessType, accessOptions } from "@/data/accessOptions";
 import { Collaborator } from "@/data/collaborators";
-import { MirrorUser } from "@/data/mirrorUsers";
+import { useHistory } from "@/contexts/HistoryContext";
 
 interface SelectedGroup {
   name: string;
   isDefault: boolean;
 }
 
+interface CSVFile {
+  name: string;
+  file: File;
+}
+
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [csvFile, setCsvFile] = useState<CSVFile | null>(null);
   const [selectedAccess, setSelectedAccess] = useState<AccessType | "">("");
   const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
-  const [selectedMirrorUser, setSelectedMirrorUser] = useState<MirrorUser | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const { addEntries } = useHistory();
 
   const steps = [
     { number: 1, label: "SELECIONAR COLABORADOR", active: currentStep >= 1 },
@@ -33,36 +42,8 @@ const Index = () => {
     { number: 3, label: "RESUMO", active: currentStep >= 3 },
   ];
 
-  const parseCSV = (content: string): Collaborator[] => {
-    const lines = content.split("\n").filter((line) => line.trim());
-    const result: Collaborator[] = [];
-
-    const startIndex = lines[0]?.toLowerCase().includes("nome") ? 1 : 0;
-
-    for (let i = startIndex; i < lines.length; i++) {
-      const values = lines[i].split(/[,;]/).map((v) => v.trim().replace(/"/g, ""));
-      
-      if (values.length >= 1 && values[0]) {
-        result.push({
-          nome: values[0] || "",
-          cpf: values[1] || "",
-          funcaoZendesk: values[2] || "Usuário Final",
-          status: "ativo",
-        });
-      }
-    }
-
-    return result;
-  };
-
-  const handleFileSelect = async (file: File) => {
-    try {
-      const content = await file.text();
-      const parsed = parseCSV(content);
-      setCollaborators((prev) => [...prev, ...parsed]);
-    } catch (error) {
-      console.error("Erro ao ler arquivo:", error);
-    }
+  const handleFileSelect = (file: File) => {
+    setCsvFile({ name: file.name, file });
   };
 
   const handleAddCollaborator = (collaborator: Collaborator) => {
@@ -71,6 +52,10 @@ const Index = () => {
 
   const handleRemoveCollaborator = (index: number) => {
     setCollaborators((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveCsv = () => {
+    setCsvFile(null);
   };
 
   const handleNext = () => {
@@ -83,6 +68,39 @@ const Index = () => {
 
   const handleConfirm = () => {
     setShowConfirmModal(false);
+    
+    // Adicionar ao histórico
+    const accessLabel = accessOptions.find(a => a.value === selectedAccess)?.label || selectedAccess;
+    const groupNames = selectedGroups.map(g => g.name);
+    
+    const entries = [];
+    
+    // Adicionar colaboradores individuais
+    for (const collab of collaborators) {
+      entries.push({
+        nome: collab.nome,
+        acesso: accessLabel,
+        grupos: groupNames,
+        quemLiberou: "Usuário Atual", // Seria o usuário logado
+      });
+    }
+    
+    // Adicionar arquivo CSV se existir
+    if (csvFile) {
+      entries.push({
+        nome: csvFile.name,
+        acesso: accessLabel,
+        grupos: groupNames,
+        quemLiberou: "Usuário Atual",
+        isCSV: true,
+        csvFileName: csvFile.name,
+      });
+    }
+    
+    if (entries.length > 0) {
+      addEntries(entries);
+    }
+    
     setCurrentStep(3);
   };
 
@@ -95,25 +113,22 @@ const Index = () => {
   const handleBackToStart = () => {
     setCurrentStep(1);
     setCollaborators([]);
+    setCsvFile(null);
     setSelectedAccess("");
     setSelectedGroups([]);
-    setSelectedMirrorUser(null);
   };
 
-  const handleMirrorUserSelect = (user: MirrorUser | null) => {
-    setSelectedMirrorUser(user);
-  };
-
-  const handleApplyMirrorGroups = (groups: SelectedGroup[]) => {
+  const handleMergeGroups = (groups: SelectedGroup[]) => {
     setSelectedGroups(groups);
   };
 
-  const canProceedStep1 = collaborators.length > 0;
+  const canProceedStep1 = collaborators.length > 0 || csvFile !== null;
   const canProceedStep2 = selectedAccess !== "" && selectedGroups.length > 0;
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header onMenuClick={() => setSidebarOpen(true)} />
+      <AppSidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
       
       <div className="border-b border-border bg-card">
         <StepIndicator steps={steps} />
@@ -126,6 +141,8 @@ const Index = () => {
               selectedCollaborators={collaborators}
               onAddCollaborator={handleAddCollaborator}
               onFileSelect={handleFileSelect}
+              csvFile={csvFile}
+              onRemoveCsv={handleRemoveCsv}
             />
 
             <p className="text-xs text-primary mt-3">
@@ -157,13 +174,10 @@ const Index = () => {
                   onGroupsChange={setSelectedGroups}
                 />
 
-                <div className="border-t border-border pt-6">
-                  <MirrorUserSelector
-                    selectedMirrorUser={selectedMirrorUser}
-                    onMirrorUserSelect={handleMirrorUserSelect}
-                    onApplyGroups={handleApplyMirrorGroups}
-                  />
-                </div>
+                <MirrorUserSelector
+                  selectedGroups={selectedGroups}
+                  onMergeGroups={handleMergeGroups}
+                />
               </>
             )}
           </div>
@@ -172,6 +186,7 @@ const Index = () => {
         {currentStep === 3 && (
           <SummaryStep
             collaborators={collaborators}
+            csvFile={csvFile}
             selectedAccess={selectedAccess as AccessType}
             selectedGroups={selectedGroups}
           />
