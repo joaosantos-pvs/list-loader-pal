@@ -303,10 +303,7 @@ const History = () => {
                 <TableCell className="py-4">
                   <div className="flex items-center gap-2">
                     {entry.isCSV && <FileText className="w-4 h-4 text-primary" />}
-                    <div>
-                      <span className="text-foreground font-medium">{entry.nome}</span>
-                      {renderCSVSummary(entry)}
-                    </div>
+                    <span className="text-foreground font-medium">{entry.nome}</span>
                   </div>
                 </TableCell>
                 <TableCell className="text-foreground">{entry.acesso}</TableCell>
