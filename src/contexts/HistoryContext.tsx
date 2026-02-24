@@ -2,6 +2,12 @@ import { createContext, useContext, useState, ReactNode } from "react";
 
 export type ProcessingStatus = "success" | "error" | "not_released";
 
+export interface CSVDetailEntry {
+  nome: string;
+  status: ProcessingStatus;
+  motivo?: string;
+}
+
 export interface HistoryEntry {
   id: string;
   nome: string;
@@ -13,6 +19,12 @@ export interface HistoryEntry {
   isCSV?: boolean;
   csvFileName?: string;
   originalFile?: File;
+  // CSV summary fields
+  totalRecords?: number;
+  successCount?: number;
+  errorCount?: number;
+  notReleasedCount?: number;
+  csvDetails?: CSVDetailEntry[];
 }
 
 interface HistoryContextType {

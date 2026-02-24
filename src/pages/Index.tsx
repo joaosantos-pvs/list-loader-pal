@@ -91,15 +91,32 @@ const Index = () => {
     
     // Adicionar arquivo CSV se existir
     if (csvFile) {
+      // Simulate CSV processing with mock data
+      const mockNames = ["Eduardo Silva", "Maria Santos", "João Oliveira", "Ana Costa", "nome"];
+      const mockDetails = mockNames.map((nome) => {
+        if (nome === "nome") return { nome, status: "error" as const, motivo: "Nome inválido" };
+        if (nome === "Ana Costa") return { nome, status: "not_released" as const, motivo: "Já possui acesso" };
+        return { nome, status: "success" as const };
+      });
+      
+      const successCount = mockDetails.filter(d => d.status === "success").length;
+      const errorCount = mockDetails.filter(d => d.status === "error").length;
+      const notReleasedCount = mockDetails.filter(d => d.status === "not_released").length;
+
       entries.push({
         nome: csvFile.name,
         acesso: accessLabel,
         grupos: selectedGroups,
         quemLiberou: "Usuário Atual",
-        status: "success" as const,
+        status: errorCount > 0 ? "error" as const : "success" as const,
         isCSV: true,
         csvFileName: csvFile.name,
         originalFile: csvFile.file,
+        totalRecords: mockDetails.length,
+        successCount,
+        errorCount,
+        notReleasedCount,
+        csvDetails: mockDetails,
       });
     }
     
