@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Trash2, Users } from "lucide-react";
+import { Trash2, Users, Search } from "lucide-react";
 import { groups } from "@/data/accessOptions";
 
 interface SelectedGroup {
@@ -25,6 +25,7 @@ interface GroupSelectorProps {
 const GroupSelector = ({ selectedGroups, onGroupsChange }: GroupSelectorProps) => {
   const [searchValue, setSearchValue] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const filteredGroups = useMemo(() => {
     if (!searchValue.trim()) return [];
@@ -43,15 +44,13 @@ const GroupSelector = ({ selectedGroups, onGroupsChange }: GroupSelectorProps) =
       ...selectedGroups,
       { name: groupName, isDefault: isFirst },
     ]);
-    setSearchValue("");
-    setShowDropdown(false);
+    // Keep dropdown open - don't close or clear search
   };
 
   const handleRemoveGroup = (groupName: string) => {
     const wasDefault = selectedGroups.find((g) => g.name === groupName)?.isDefault;
     let newGroups = selectedGroups.filter((g) => g.name !== groupName);
     
-    // Se removeu o grupo padrão, define o primeiro como padrão
     if (wasDefault && newGroups.length > 0) {
       newGroups = newGroups.map((g, i) => ({ ...g, isDefault: i === 0 }));
     }
@@ -68,19 +67,32 @@ const GroupSelector = ({ selectedGroups, onGroupsChange }: GroupSelectorProps) =
     );
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <div className="space-y-4">
-      <div className="relative">
-        <Input
-          placeholder="Digite o nome do grupo"
-          value={searchValue}
-          onChange={(e) => {
-            setSearchValue(e.target.value);
-            setShowDropdown(true);
-          }}
-          onFocus={() => setShowDropdown(true)}
-          className="bg-card border-border"
-        />
+      <div className="relative" ref={dropdownRef}>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar grupo por nome"
+            value={searchValue}
+            onChange={(e) => {
+              setSearchValue(e.target.value);
+              setShowDropdown(true);
+            }}
+            onFocus={() => setShowDropdown(true)}
+            className="pl-10 bg-card border-border"
+          />
+        </div>
         
         {showDropdown && filteredGroups.length > 0 && (
           <div className="absolute z-10 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-60 overflow-auto">
@@ -98,7 +110,7 @@ const GroupSelector = ({ selectedGroups, onGroupsChange }: GroupSelectorProps) =
       </div>
 
       <p className="text-xs text-primary">
-        A busca exibe apenas os 25 primeiros grupos em ordem alfabética.
+        A busca exibe apenas os 25 primeiros grupos em ordem alfabética. O dropdown permanece aberto para seleção múltipla.
       </p>
 
       {selectedGroups.length > 0 && (
