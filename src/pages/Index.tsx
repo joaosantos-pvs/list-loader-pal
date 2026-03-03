@@ -23,7 +23,25 @@ interface SelectedGroup {
 interface CSVFile {
   name: string;
   file: File;
+  parsedNames: string[];
 }
+
+const parseCSVFile = (file: File): Promise<string[]> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      if (!text) {
+        resolve([]);
+        return;
+      }
+      const lines = text.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0);
+      resolve(lines);
+    };
+    reader.onerror = () => resolve([]);
+    reader.readAsText(file);
+  });
+};
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -42,8 +60,9 @@ const Index = () => {
     { number: 3, label: "RESUMO", active: currentStep >= 3 },
   ];
 
-  const handleFileSelect = (file: File) => {
-    setCsvFile({ name: file.name, file });
+  const handleFileSelect = async (file: File) => {
+    const parsedNames = await parseCSVFile(file);
+    setCsvFile({ name: file.name, file, parsedNames });
   };
 
   const handleAddCollaborator = (collaborator: Collaborator) => {
@@ -68,62 +87,51 @@ const Index = () => {
 
   const handleConfirm = () => {
     setShowConfirmModal(false);
-    
-    // Adicionar ao histórico
-    const accessLabel = accessOptions.find(a => a.value === selectedAccess)?.label || selectedAccess;
-    
+
+    const accessLabel = accessOptions.find((a) => a.value === selectedAccess)?.label || selectedAccess;
+
     const entries = [];
-    
-    // Adicionar colaboradores individuais
+
+    // Individual collaborators - all go as pending
     for (const collab of collaborators) {
-      // Simulate random status for demo purposes
-      const statuses = ["success", "error", "not_released"] as const;
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-      
       entries.push({
         nome: collab.nome,
+        cpf: collab.cpf,
         acesso: accessLabel,
         grupos: selectedGroups,
         quemLiberou: "Usuário Atual",
-        status: randomStatus,
+        status: "pending" as const,
       });
     }
-    
-    // Adicionar arquivo CSV se existir
+
+    // CSV file - goes as pending, use actual file content
     if (csvFile) {
-      // Simulate CSV processing with mock data
-      const mockNames = ["Eduardo Silva", "Maria Santos", "João Oliveira", "Ana Costa", "nome"];
-      const mockDetails = mockNames.map((nome) => {
-        if (nome === "nome") return { nome, status: "error" as const, motivo: "Nome inválido" };
-        if (nome === "Ana Costa") return { nome, status: "not_released" as const, motivo: "Já possui acesso" };
-        return { nome, status: "success" as const };
-      });
-      
-      const successCount = mockDetails.filter(d => d.status === "success").length;
-      const errorCount = mockDetails.filter(d => d.status === "error").length;
-      const notReleasedCount = mockDetails.filter(d => d.status === "not_released").length;
+      const csvDetails = csvFile.parsedNames.map((nome) => ({
+        nome,
+        status: "pending" as const,
+      }));
 
       entries.push({
         nome: csvFile.name,
         acesso: accessLabel,
         grupos: selectedGroups,
         quemLiberou: "Usuário Atual",
-        status: errorCount > 0 ? "error" as const : "success" as const,
+        status: "pending" as const,
         isCSV: true,
         csvFileName: csvFile.name,
         originalFile: csvFile.file,
-        totalRecords: mockDetails.length,
-        successCount,
-        errorCount,
-        notReleasedCount,
-        csvDetails: mockDetails,
+        totalRecords: csvFile.parsedNames.length,
+        successCount: 0,
+        errorCount: 0,
+        notReleasedCount: 0,
+        csvDetails,
       });
     }
-    
+
     if (entries.length > 0) {
       addEntries(entries);
     }
-    
+
     setCurrentStep(3);
   };
 

@@ -6,7 +6,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
 
 interface HistoryFiltersProps {
   statusFilter: string;
@@ -15,6 +14,9 @@ interface HistoryFiltersProps {
   onTypeChange: (value: string) => void;
   dateFilter: string;
   onDateChange: (value: string) => void;
+  quemLiberouFilter: string;
+  onQuemLiberouChange: (value: string) => void;
+  quemLiberouOptions: string[];
 }
 
 const HistoryFilters = ({
@@ -24,9 +26,22 @@ const HistoryFilters = ({
   onTypeChange,
   dateFilter,
   onDateChange,
+  quemLiberouFilter,
+  onQuemLiberouChange,
+  quemLiberouOptions,
 }: HistoryFiltersProps) => {
   return (
     <div className="flex flex-wrap gap-3 items-center">
+      <Select value={typeFilter} onValueChange={onTypeChange}>
+        <SelectTrigger className="w-[200px] bg-card border-border">
+          <SelectValue placeholder="Tipo de liberação" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="individual">Acesso Individual</SelectItem>
+          <SelectItem value="csv">Acesso em Lote</SelectItem>
+        </SelectContent>
+      </Select>
+
       <Select value={statusFilter} onValueChange={onStatusChange}>
         <SelectTrigger className="w-[180px] bg-card border-border">
           <SelectValue placeholder="Todos os status" />
@@ -39,14 +54,17 @@ const HistoryFilters = ({
         </SelectContent>
       </Select>
 
-      <Select value={typeFilter} onValueChange={onTypeChange}>
-        <SelectTrigger className="w-[180px] bg-card border-border">
-          <SelectValue placeholder="Todos os tipos" />
+      <Select value={quemLiberouFilter} onValueChange={onQuemLiberouChange}>
+        <SelectTrigger className="w-[200px] bg-card border-border">
+          <SelectValue placeholder="Quem liberou" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Todos os tipos</SelectItem>
-          <SelectItem value="individual">Individual</SelectItem>
-          <SelectItem value="csv">Lote (CSV)</SelectItem>
+          <SelectItem value="all">Todos</SelectItem>
+          {quemLiberouOptions.map((name) => (
+            <SelectItem key={name} value={name}>
+              {name}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 
