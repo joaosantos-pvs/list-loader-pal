@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { format, isSameDay, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -15,11 +15,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { useHistory, HistoryEntry, ProcessingStatus } from "@/contexts/HistoryContext";
 import {
   FileText,
@@ -29,9 +24,8 @@ import {
   RefreshCw,
   Download,
   Info,
-  ChevronDown,
-  ChevronRight,
   Users,
+  Loader2,
 } from "lucide-react";
 import Header from "@/components/Header";
 import AppSidebar from "@/components/AppSidebar";
@@ -43,10 +37,16 @@ const History = () => {
   const { history, updateEntryStatus } = useHistory();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("individual");
   const [dateFilter, setDateFilter] = useState("");
+  const [quemLiberouFilter, setQuemLiberouFilter] = useState("all");
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [csvModalEntry, setCsvModalEntry] = useState<HistoryEntry | null>(null);
+
+  const quemLiberouOptions = useMemo(() => {
+    const names = new Set(history.map((e) => e.quemLiberou));
+    return Array.from(names).sort();
+  }, [history]);
 
   const toggleRow = (id: string) => {
     setExpandedRows((prev) => {
@@ -57,26 +57,33 @@ const History = () => {
     });
   };
 
+  const isIndividualView = typeFilter === "individual";
+
   const filterEntries = (entries: HistoryEntry[]) => {
     return entries.filter((e) => {
+      if (isIndividualView && e.isCSV) return false;
+      if (!isIndividualView && !e.isCSV) return false;
       if (statusFilter !== "all" && e.status !== statusFilter) return false;
-      if (typeFilter === "individual" && e.isCSV) return false;
-      if (typeFilter === "csv" && !e.isCSV) return false;
+      if (quemLiberouFilter !== "all" && e.quemLiberou !== quemLiberouFilter) return false;
       if (dateFilter) {
         try {
           const filterDate = parseISO(dateFilter);
           if (!isSameDay(e.dataLiberacao, filterDate)) return false;
-        } catch { return true; }
+        } catch {
+          return true;
+        }
       }
       return true;
     });
   };
 
+  // Processados = everything that is NOT pending
   const processedEntries = filterEntries(
-    history.filter((e) => e.status === "success" || e.status === "not_released")
+    history.filter((e) => e.status !== "pending")
   );
+  // Enviados ao processamento = pending only
   const pendingEntries = filterEntries(
-    history.filter((e) => e.status === "error")
+    history.filter((e) => e.status === "pending")
   );
 
   const handleReprocess = (id: string) => {
@@ -141,9 +148,10 @@ const History = () => {
   const renderExpandedGroups = (entry: HistoryEntry) => {
     if (!expandedRows.has(entry.id)) return null;
     const sorted = sortedGroups(entry.grupos);
+    const colSpan = isIndividualView ? 7 : 7;
     return (
       <TableRow className="border-border bg-muted/30">
-        <TableCell colSpan={6} className="py-3">
+        <TableCell colSpan={colSpan} className="py-3">
           <div className="pl-8 space-y-1">
             <p className="text-xs font-semibold text-muted-foreground mb-2">TODOS OS GRUPOS:</p>
             {sorted.map((g, i) => (
@@ -163,57 +171,76 @@ const History = () => {
     );
   };
 
-  const renderCSVSummary = (entry: HistoryEntry) => {
-    if (!entry.isCSV) return null;
-    return (
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        <span>{entry.totalRecords ?? 0} enviados</span>
-        <span className="text-success">{entry.successCount ?? 0} ✓</span>
-        <span className="text-destructive">{entry.errorCount ?? 0} ✗</span>
-      </div>
-    );
+  const renderStatusIcon = (status: ProcessingStatus) => {
+    switch (status) {
+      case "success":
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center justify-center"><CheckCircle className="w-5 h-5 text-success" /></div>
+            </TooltipTrigger>
+            <TooltipContent>Sucesso</TooltipContent>
+          </Tooltip>
+        );
+      case "error":
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center justify-center"><XCircle className="w-5 h-5 text-destructive" /></div>
+            </TooltipTrigger>
+            <TooltipContent>Erro</TooltipContent>
+          </Tooltip>
+        );
+      case "not_released":
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center justify-center"><Ban className="w-5 h-5 text-muted-foreground" /></div>
+            </TooltipTrigger>
+            <TooltipContent>Não liberado (já possui acesso)</TooltipContent>
+          </Tooltip>
+        );
+      case "pending":
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center justify-center"><Loader2 className="w-5 h-5 text-amber-500 animate-spin" /></div>
+            </TooltipTrigger>
+            <TooltipContent>Em processamento</TooltipContent>
+          </Tooltip>
+        );
+    }
   };
 
-  const renderStatus = (entry: HistoryEntry) => {
+  const renderActions = (entry: HistoryEntry, isPending: boolean) => {
+    if (isPending) return <span className="text-xs text-muted-foreground">—</span>;
+
     if (entry.isCSV) {
       return (
         <div className="flex items-center justify-center gap-1">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => setCsvModalEntry(entry)}
-              >
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setCsvModalEntry(entry)}>
                 <Info className="w-4 h-4 text-primary" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Detalhes</TooltipContent>
           </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => handleReprocess(entry.id)}
-              >
-                <RefreshCw className="w-4 h-4 text-amber-500" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Reprocessar</TooltipContent>
-          </Tooltip>
+          {(entry.errorCount ?? 0) > 0 && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleReprocess(entry.id)}>
+                  <RefreshCw className="w-4 h-4 text-amber-500" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Reprocessar</TooltipContent>
+            </Tooltip>
+          )}
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => handleDownloadResult(entry)}
-              >
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadResult(entry)}>
                 <Download className="w-4 h-4 text-primary" />
               </Button>
             </TooltipTrigger>
@@ -222,12 +249,7 @@ const History = () => {
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => handleDownloadOriginal(entry)}
-              >
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadOriginal(entry)}>
                 <FileText className="w-4 h-4 text-muted-foreground" />
               </Button>
             </TooltipTrigger>
@@ -237,44 +259,26 @@ const History = () => {
       );
     }
 
-    const statusConfig: Record<ProcessingStatus, { icon: React.ReactNode; label: string }> = {
-      success: {
-        icon: <CheckCircle className="w-5 h-5 text-success" />,
-        label: "Sucesso",
-      },
-      error: {
-        icon: (
-          <button
-            onClick={() => handleReprocess(entry.id)}
-            className="flex items-center gap-1 text-destructive hover:text-destructive/80 transition-colors"
-          >
-            <XCircle className="w-5 h-5" />
-            <RefreshCw className="w-3 h-3" />
-          </button>
-        ),
-        label: "Erro - Clique para reprocessar",
-      },
-      not_released: {
-        icon: <Ban className="w-5 h-5 text-muted-foreground" />,
-        label: "Não liberado (já tinha acesso)",
-      },
-    };
+    // Individual entry actions
+    if (entry.status === "error") {
+      return (
+        <div className="flex items-center justify-center">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleReprocess(entry.id)}>
+                <RefreshCw className="w-4 h-4 text-amber-500" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Reprocessar</TooltipContent>
+          </Tooltip>
+        </div>
+      );
+    }
 
-    const config = statusConfig[entry.status];
-
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex items-center justify-center cursor-default">
-            {config.icon}
-          </div>
-        </TooltipTrigger>
-        <TooltipContent>{config.label}</TooltipContent>
-      </Tooltip>
-    );
+    return <span className="text-xs text-muted-foreground">—</span>;
   };
 
-  const renderTable = (entries: HistoryEntry[]) => {
+  const renderTable = (entries: HistoryEntry[], isPending: boolean) => {
     if (entries.length === 0) {
       return (
         <div className="p-12 text-center">
@@ -288,12 +292,17 @@ const History = () => {
       <Table>
         <TableHeader>
           <TableRow className="border-border hover:bg-transparent">
-            <TableHead className="text-muted-foreground font-semibold">NOME</TableHead>
+            <TableHead className="text-muted-foreground font-semibold">TIPO DE LIBERAÇÃO</TableHead>
             <TableHead className="text-muted-foreground font-semibold">ACESSO</TableHead>
             <TableHead className="text-muted-foreground font-semibold">GRUPOS</TableHead>
             <TableHead className="text-muted-foreground font-semibold">DATA DE LIBERAÇÃO</TableHead>
             <TableHead className="text-muted-foreground font-semibold">QUEM LIBEROU</TableHead>
-            <TableHead className="text-muted-foreground font-semibold text-center">STATUS</TableHead>
+            {!isPending && (
+              <TableHead className="text-muted-foreground font-semibold text-center">STATUS</TableHead>
+            )}
+            {!isPending ? (
+              <TableHead className="text-muted-foreground font-semibold text-center">AÇÕES</TableHead>
+            ) : null}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -303,7 +312,9 @@ const History = () => {
                 <TableCell className="py-4">
                   <div className="flex items-center gap-2">
                     {entry.isCSV && <FileText className="w-4 h-4 text-primary" />}
-                    <span className="text-foreground font-medium">{entry.nome}</span>
+                    <span className="text-foreground font-medium">
+                      {entry.isCSV ? entry.csvFileName || entry.nome : entry.cpf || entry.nome}
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell className="text-foreground">{entry.acesso}</TableCell>
@@ -312,7 +323,12 @@ const History = () => {
                   {format(entry.dataLiberacao, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                 </TableCell>
                 <TableCell className="text-foreground">{entry.quemLiberou}</TableCell>
-                <TableCell>{renderStatus(entry)}</TableCell>
+                {!isPending && (
+                  <TableCell>{renderStatusIcon(entry.status)}</TableCell>
+                )}
+                {!isPending && (
+                  <TableCell>{renderActions(entry, isPending)}</TableCell>
+                )}
               </TableRow>
               {renderExpandedGroups(entry)}
             </>
@@ -331,7 +347,7 @@ const History = () => {
         <div className="mb-6">
           <h2 className="text-xl font-semibold text-foreground">Histórico de Liberação</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Visualize todos os acessos liberados ao Zendesk
+            Visualize todos os acessos liberados e tentativas de liberação
           </p>
         </div>
 
@@ -342,6 +358,9 @@ const History = () => {
           onTypeChange={setTypeFilter}
           dateFilter={dateFilter}
           onDateChange={setDateFilter}
+          quemLiberouFilter={quemLiberouFilter}
+          onQuemLiberouChange={setQuemLiberouFilter}
+          quemLiberouOptions={quemLiberouOptions}
         />
 
         <div className="mt-4 bg-card rounded-lg border border-border">
@@ -358,11 +377,11 @@ const History = () => {
             </div>
 
             <TabsContent value="processed" className="mt-0">
-              {renderTable(processedEntries)}
+              {renderTable(processedEntries, false)}
             </TabsContent>
 
             <TabsContent value="pending" className="mt-0">
-              {renderTable(pendingEntries)}
+              {renderTable(pendingEntries, true)}
             </TabsContent>
           </Tabs>
         </div>
