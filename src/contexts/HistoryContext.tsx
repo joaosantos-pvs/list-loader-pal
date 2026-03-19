@@ -207,9 +207,12 @@ export const HistoryProvider = ({ children }: { children: ReactNode }) => {
             const errorCount = processedDetails.filter((d) => d.status === "error").length;
             const notReleasedCount = processedDetails.filter((d) => d.status === "not_released").length;
 
+            // Only error if ZERO succeeded (all were errors/not_released)
+            const batchStatus = successCount > 0 ? "success" as const : "error" as const;
+
             return {
               ...entry,
-              status: errorCount > 0 ? ("error" as const) : ("success" as const),
+              status: batchStatus,
               csvDetails: processedDetails,
               successCount,
               errorCount,
