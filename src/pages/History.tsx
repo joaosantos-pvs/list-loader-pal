@@ -148,7 +148,7 @@ const History = () => {
   const renderExpandedGroups = (entry: HistoryEntry) => {
     if (!expandedRows.has(entry.id)) return null;
     const sorted = sortedGroups(entry.grupos);
-    const colSpan = isIndividualView ? 7 : 7;
+    const colSpan = isIndividualView ? 8 : 7;
     return (
       <TableRow className="border-border bg-muted/30">
         <TableCell colSpan={colSpan} className="py-3">
