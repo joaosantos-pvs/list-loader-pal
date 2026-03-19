@@ -37,7 +37,148 @@ interface HistoryContextType {
 const HistoryContext = createContext<HistoryContextType | undefined>(undefined);
 
 export const HistoryProvider = ({ children }: { children: ReactNode }) => {
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>(() => {
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+    const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+
+    const sampleGroups = [
+      { name: "Grupo Vendas", isDefault: true },
+      { name: "Grupo Marketing", isDefault: false },
+      { name: "Grupo Financeiro", isDefault: false },
+    ];
+
+    return [
+      // Individual - pending
+      {
+        id: "ind-pending-1",
+        nome: "Lucas Ferreira",
+        cpf: "321.654.987-00",
+        acesso: "Portal RH",
+        grupos: [{ name: "Grupo Vendas", isDefault: true }],
+        dataLiberacao: now,
+        quemLiberou: "Ana Paula Silva",
+        status: "pending" as ProcessingStatus,
+        isCSV: false,
+      },
+      // Individual - processed
+      {
+        id: "ind-success-1",
+        nome: "Maria Oliveira",
+        cpf: "123.456.789-00",
+        acesso: "Sistema ERP",
+        grupos: sampleGroups,
+        dataLiberacao: oneHourAgo,
+        quemLiberou: "Carlos Eduardo",
+        status: "success" as ProcessingStatus,
+        isCSV: false,
+      },
+      {
+        id: "ind-error-1",
+        nome: "João Santos",
+        cpf: "987.654.321-00",
+        acesso: "Portal Financeiro",
+        grupos: [{ name: "Grupo Financeiro", isDefault: true }],
+        dataLiberacao: twoHoursAgo,
+        quemLiberou: "Ana Paula Silva",
+        status: "error" as ProcessingStatus,
+        isCSV: false,
+      },
+      {
+        id: "ind-notrel-1",
+        nome: "Fernanda Costa",
+        cpf: "456.789.123-00",
+        acesso: "Sistema ERP",
+        grupos: [{ name: "Grupo Marketing", isDefault: true }],
+        dataLiberacao: threeHoursAgo,
+        quemLiberou: "Carlos Eduardo",
+        status: "not_released" as ProcessingStatus,
+        isCSV: false,
+      },
+      // CSV - pending
+      {
+        id: "csv-pending-1",
+        nome: "colaboradores_novos.csv",
+        acesso: "Portal RH",
+        grupos: [{ name: "Grupo Vendas", isDefault: true }, { name: "Grupo Marketing", isDefault: false }],
+        dataLiberacao: now,
+        quemLiberou: "Ana Paula Silva",
+        status: "pending" as ProcessingStatus,
+        isCSV: true,
+        csvFileName: "colaboradores_novos.csv",
+        totalRecords: 4,
+        csvDetails: [
+          { nome: "Ricardo Almeida", status: "pending" as ProcessingStatus },
+          { nome: "Patrícia Lima", status: "pending" as ProcessingStatus },
+          { nome: "Bruno Mendes", status: "pending" as ProcessingStatus },
+          { nome: "Camila Rocha", status: "pending" as ProcessingStatus },
+        ],
+      },
+      // CSV - processed
+      {
+        id: "csv-success-1",
+        nome: "equipe_vendas.csv",
+        acesso: "Sistema ERP",
+        grupos: sampleGroups,
+        dataLiberacao: oneHourAgo,
+        quemLiberou: "Carlos Eduardo",
+        status: "success" as ProcessingStatus,
+        isCSV: true,
+        csvFileName: "equipe_vendas.csv",
+        totalRecords: 3,
+        successCount: 3,
+        errorCount: 0,
+        notReleasedCount: 0,
+        csvDetails: [
+          { nome: "Thiago Martins", status: "success" as ProcessingStatus },
+          { nome: "Juliana Pereira", status: "success" as ProcessingStatus },
+          { nome: "Rafael Souza", status: "success" as ProcessingStatus },
+        ],
+      },
+      {
+        id: "csv-error-1",
+        nome: "novos_acessos_marco.csv",
+        acesso: "Portal Financeiro",
+        grupos: [{ name: "Grupo Financeiro", isDefault: true }],
+        dataLiberacao: twoHoursAgo,
+        quemLiberou: "Ana Paula Silva",
+        status: "error" as ProcessingStatus,
+        isCSV: true,
+        csvFileName: "novos_acessos_marco.csv",
+        totalRecords: 5,
+        successCount: 3,
+        errorCount: 1,
+        notReleasedCount: 1,
+        csvDetails: [
+          { nome: "Diego Nascimento", status: "success" as ProcessingStatus },
+          { nome: "Amanda Ribeiro", status: "success" as ProcessingStatus },
+          { nome: "Felipe Cardoso", status: "success" as ProcessingStatus },
+          { nome: "Larissa Monteiro", status: "error" as ProcessingStatus, motivo: "Erro ao conectar com o servidor" },
+          { nome: "Gustavo Teixeira", status: "not_released" as ProcessingStatus, motivo: "Já possui acesso" },
+        ],
+      },
+      {
+        id: "csv-notrel-1",
+        nome: "lista_marketing.csv",
+        acesso: "Sistema ERP",
+        grupos: [{ name: "Grupo Marketing", isDefault: true }],
+        dataLiberacao: threeHoursAgo,
+        quemLiberou: "Carlos Eduardo",
+        status: "success" as ProcessingStatus,
+        isCSV: true,
+        csvFileName: "lista_marketing.csv",
+        totalRecords: 2,
+        successCount: 1,
+        errorCount: 0,
+        notReleasedCount: 1,
+        csvDetails: [
+          { nome: "Vinícius Barros", status: "success" as ProcessingStatus },
+          { nome: "Isabela Campos", status: "not_released" as ProcessingStatus, motivo: "Já possui acesso" },
+        ],
+      },
+    ];
+  });
   const timerRefs = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
   const scheduleProcessing = useCallback((entryId: string) => {
