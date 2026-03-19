@@ -148,7 +148,7 @@ const History = () => {
   const renderExpandedGroups = (entry: HistoryEntry) => {
     if (!expandedRows.has(entry.id)) return null;
     const sorted = sortedGroups(entry.grupos);
-    const colSpan = isIndividualView ? 7 : 7;
+    const colSpan = isIndividualView ? 8 : 7;
     return (
       <TableRow className="border-border bg-muted/30">
         <TableCell colSpan={colSpan} className="py-3">
@@ -292,7 +292,10 @@ const History = () => {
       <Table>
         <TableHeader>
           <TableRow className="border-border hover:bg-transparent">
-            <TableHead className="text-muted-foreground font-semibold">TIPO DE LIBERAÇÃO</TableHead>
+            <TableHead className="text-muted-foreground font-semibold">NOME</TableHead>
+            {isIndividualView && (
+              <TableHead className="text-muted-foreground font-semibold">CPF</TableHead>
+            )}
             <TableHead className="text-muted-foreground font-semibold">ACESSO</TableHead>
             <TableHead className="text-muted-foreground font-semibold">GRUPOS</TableHead>
             <TableHead className="text-muted-foreground font-semibold">DATA DE LIBERAÇÃO</TableHead>
@@ -313,10 +316,13 @@ const History = () => {
                   <div className="flex items-center gap-2">
                     {entry.isCSV && <FileText className="w-4 h-4 text-primary" />}
                     <span className="text-foreground font-medium">
-                      {entry.isCSV ? entry.csvFileName || entry.nome : entry.cpf || entry.nome}
+                      {entry.isCSV ? entry.csvFileName || entry.nome : entry.nome}
                     </span>
                   </div>
                 </TableCell>
+                {isIndividualView && (
+                  <TableCell className="text-foreground">{entry.cpf || "—"}</TableCell>
+                )}
                 <TableCell className="text-foreground">{entry.acesso}</TableCell>
                 <TableCell>{renderGroupsCell(entry)}</TableCell>
                 <TableCell className="text-foreground">
