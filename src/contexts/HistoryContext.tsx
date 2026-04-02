@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useRef, ReactNode } from "react";
 
-export type ProcessingStatus = "success" | "error" | "not_released" | "pending";
+export type ProcessingStatus = "success" | "error" | "already_has_access" | "not_found" | "pending";
 
 export interface CSVDetailEntry {
   nome: string;
@@ -23,7 +23,8 @@ export interface HistoryEntry {
   totalRecords?: number;
   successCount?: number;
   errorCount?: number;
-  notReleasedCount?: number;
+  alreadyHasAccessCount?: number;
+  notFoundCount?: number;
   csvDetails?: CSVDetailEntry[];
 }
 
@@ -86,14 +87,25 @@ export const HistoryProvider = ({ children }: { children: ReactNode }) => {
         isCSV: false,
       },
       {
-        id: "ind-notrel-1",
+        id: "ind-already-1",
         nome: "Fernanda Costa",
         cpf: "456.789.123-00",
         acesso: "Agente Full - Sem Relatório",
         grupos: [{ name: "APS - SP - Enfermagem", isDefault: true }],
         dataLiberacao: threeHoursAgo,
         quemLiberou: "Carlos Eduardo",
-        status: "not_released" as ProcessingStatus,
+        status: "already_has_access" as ProcessingStatus,
+        isCSV: false,
+      },
+      {
+        id: "ind-notfound-1",
+        nome: "Roberto Lima",
+        cpf: "111.222.333-44",
+        acesso: "Agente light",
+        grupos: [{ name: "APS - RJ - 001 - Enfermagem", isDefault: true }],
+        dataLiberacao: threeHoursAgo,
+        quemLiberou: "Ana Paula Silva",
+        status: "not_found" as ProcessingStatus,
         isCSV: false,
       },
       // CSV - pending
@@ -129,7 +141,8 @@ export const HistoryProvider = ({ children }: { children: ReactNode }) => {
         totalRecords: 3,
         successCount: 3,
         errorCount: 0,
-        notReleasedCount: 0,
+        alreadyHasAccessCount: 0,
+        notFoundCount: 0,
         csvDetails: [
           { nome: "Thiago Martins", status: "success" as ProcessingStatus },
           { nome: "Juliana Pereira", status: "success" as ProcessingStatus },
@@ -146,16 +159,18 @@ export const HistoryProvider = ({ children }: { children: ReactNode }) => {
         status: "error" as ProcessingStatus,
         isCSV: true,
         csvFileName: "novos_acessos_marco.csv",
-        totalRecords: 5,
+        totalRecords: 6,
         successCount: 3,
         errorCount: 1,
-        notReleasedCount: 1,
+        alreadyHasAccessCount: 1,
+        notFoundCount: 1,
         csvDetails: [
           { nome: "Diego Nascimento", status: "success" as ProcessingStatus },
           { nome: "Amanda Ribeiro", status: "success" as ProcessingStatus },
           { nome: "Felipe Cardoso", status: "success" as ProcessingStatus },
           { nome: "Larissa Monteiro", status: "error" as ProcessingStatus, motivo: "Erro ao conectar com o servidor" },
-          { nome: "Gustavo Teixeira", status: "not_released" as ProcessingStatus, motivo: "Já possui acesso" },
+          { nome: "Gustavo Teixeira", status: "already_has_access" as ProcessingStatus, motivo: "Já possui acesso" },
+          { nome: "Marcos Vieira", status: "not_found" as ProcessingStatus, motivo: "Colaborador não encontrado na base" },
         ],
       },
       {
@@ -171,10 +186,11 @@ export const HistoryProvider = ({ children }: { children: ReactNode }) => {
         totalRecords: 2,
         successCount: 1,
         errorCount: 0,
-        notReleasedCount: 1,
+        alreadyHasAccessCount: 1,
+        notFoundCount: 0,
         csvDetails: [
           { nome: "Vinícius Barros", status: "success" as ProcessingStatus },
-          { nome: "Isabela Campos", status: "not_released" as ProcessingStatus, motivo: "Já possui acesso" },
+          { nome: "Isabela Campos", status: "already_has_access" as ProcessingStatus, motivo: "Já possui acesso" },
         ],
       },
     ];
@@ -197,15 +213,19 @@ export const HistoryProvider = ({ children }: { children: ReactNode }) => {
                 return { ...d, status: "error" as const, motivo: "Nome inválido" };
               }
               // Random chance of not_released for demo
-              if (Math.random() < 0.15) {
-                return { ...d, status: "not_released" as const, motivo: "Já possui acesso" };
+              if (Math.random() < 0.1) {
+                return { ...d, status: "already_has_access" as const, motivo: "Já possui acesso" };
+              }
+              if (Math.random() < 0.1) {
+                return { ...d, status: "not_found" as const, motivo: "Colaborador não encontrado na base" };
               }
               return { ...d, status: "success" as const };
             });
 
             const successCount = processedDetails.filter((d) => d.status === "success").length;
             const errorCount = processedDetails.filter((d) => d.status === "error").length;
-            const notReleasedCount = processedDetails.filter((d) => d.status === "not_released").length;
+            const alreadyHasAccessCount = processedDetails.filter((d) => d.status === "already_has_access").length;
+            const notFoundCount = processedDetails.filter((d) => d.status === "not_found").length;
 
             // Only error if ZERO succeeded (all were errors/not_released)
             const batchStatus = successCount > 0 ? "success" as const : "error" as const;
@@ -216,11 +236,12 @@ export const HistoryProvider = ({ children }: { children: ReactNode }) => {
               csvDetails: processedDetails,
               successCount,
               errorCount,
-              notReleasedCount,
+              alreadyHasAccessCount,
+              notFoundCount,
             };
           } else {
             // Individual entry - simulate random result
-            const outcomes = ["success", "error", "not_released"] as const;
+            const outcomes = ["success", "error", "already_has_access", "not_found"] as const;
             const result = outcomes[Math.floor(Math.random() * outcomes.length)];
             return { ...entry, status: result };
           }

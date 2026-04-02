@@ -21,7 +21,7 @@ import {
   CheckCircle,
   XCircle,
   Ban,
-  RefreshCw,
+  Search,
   Download,
   Info,
   Users,
@@ -34,7 +34,7 @@ import HistoryFilters from "@/components/HistoryFilters";
 import CSVDetailModal from "@/components/CSVDetailModal";
 
 const History = () => {
-  const { history, updateEntryStatus } = useHistory();
+  const { history } = useHistory();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("individual");
@@ -86,9 +86,6 @@ const History = () => {
     history.filter((e) => e.status === "pending")
   );
 
-  const handleReprocess = (id: string) => {
-    updateEntryStatus(id, "success");
-  };
 
   const handleDownloadResult = (entry: HistoryEntry) => {
     const details = entry.csvDetails || [];
@@ -191,13 +188,22 @@ const History = () => {
             <TooltipContent>Erro</TooltipContent>
           </Tooltip>
         );
-      case "not_released":
+      case "already_has_access":
         return (
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center justify-center"><Ban className="w-5 h-5 text-muted-foreground" /></div>
             </TooltipTrigger>
-            <TooltipContent>Não liberado (já possui acesso)</TooltipContent>
+            <TooltipContent>Já possui acesso</TooltipContent>
+          </Tooltip>
+        );
+      case "not_found":
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center justify-center"><Search className="w-5 h-5 text-amber-500" /></div>
+            </TooltipTrigger>
+            <TooltipContent>Não encontrado / inválido</TooltipContent>
           </Tooltip>
         );
       case "pending":
@@ -227,17 +233,6 @@ const History = () => {
             <TooltipContent>Detalhes</TooltipContent>
           </Tooltip>
 
-          {(entry.errorCount ?? 0) > 0 && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleReprocess(entry.id)}>
-                  <RefreshCw className="w-4 h-4 text-amber-500" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Reprocessar</TooltipContent>
-            </Tooltip>
-          )}
-
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadResult(entry)}>
@@ -254,22 +249,6 @@ const History = () => {
               </Button>
             </TooltipTrigger>
             <TooltipContent>Download CSV Entrada</TooltipContent>
-          </Tooltip>
-        </div>
-      );
-    }
-
-    // Individual entry actions
-    if (entry.status === "error") {
-      return (
-        <div className="flex items-center justify-center">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleReprocess(entry.id)}>
-                <RefreshCw className="w-4 h-4 text-amber-500" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Reprocessar</TooltipContent>
           </Tooltip>
         </div>
       );

@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CheckCircle, XCircle, Ban } from "lucide-react";
+import { CheckCircle, XCircle, Ban, Search } from "lucide-react";
 import { HistoryEntry, CSVDetailEntry } from "@/contexts/HistoryContext";
 
 interface CSVDetailModalProps {
@@ -28,8 +28,10 @@ const statusIcon = (status: CSVDetailEntry["status"]) => {
       return <CheckCircle className="w-4 h-4 text-success" />;
     case "error":
       return <XCircle className="w-4 h-4 text-destructive" />;
-    case "not_released":
+    case "already_has_access":
       return <Ban className="w-4 h-4 text-muted-foreground" />;
+    case "not_found":
+      return <Search className="w-4 h-4 text-amber-500" />;
   }
 };
 
@@ -39,8 +41,10 @@ const statusLabel = (status: CSVDetailEntry["status"]) => {
       return "Sucesso";
     case "error":
       return "Erro";
-    case "not_released":
-      return "Não liberado";
+    case "already_has_access":
+      return "Já possui acesso";
+    case "not_found":
+      return "Não encontrado";
   }
 };
 
@@ -59,7 +63,7 @@ const CSVDetailModal = ({ entry, open, onOpenChange }: CSVDetailModalProps) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-4 gap-3 my-4">
+        <div className="grid grid-cols-5 gap-3 my-4">
           <div className="bg-muted rounded-lg p-3 text-center">
             <p className="text-2xl font-bold text-foreground">{entry.totalRecords ?? 0}</p>
             <p className="text-xs text-muted-foreground">Enviados</p>
@@ -73,8 +77,12 @@ const CSVDetailModal = ({ entry, open, onOpenChange }: CSVDetailModalProps) => {
             <p className="text-xs text-muted-foreground">Erros</p>
           </div>
           <div className="bg-muted rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold text-muted-foreground">{entry.notReleasedCount ?? 0}</p>
-            <p className="text-xs text-muted-foreground">Não liberados</p>
+            <p className="text-2xl font-bold text-muted-foreground">{entry.alreadyHasAccessCount ?? 0}</p>
+            <p className="text-xs text-muted-foreground">Já possui acesso</p>
+          </div>
+          <div className="bg-muted rounded-lg p-3 text-center">
+            <p className="text-2xl font-bold text-amber-500">{entry.notFoundCount ?? 0}</p>
+            <p className="text-xs text-muted-foreground">Não encontrados</p>
           </div>
         </div>
 
