@@ -28,8 +28,10 @@ const statusIcon = (status: CSVDetailEntry["status"]) => {
       return <CheckCircle className="w-4 h-4 text-success" />;
     case "error":
       return <XCircle className="w-4 h-4 text-destructive" />;
-    case "not_released":
+    case "already_has_access":
       return <Ban className="w-4 h-4 text-muted-foreground" />;
+    case "not_found":
+      return <Search className="w-4 h-4 text-amber-500" />;
   }
 };
 
@@ -39,8 +41,10 @@ const statusLabel = (status: CSVDetailEntry["status"]) => {
       return "Sucesso";
     case "error":
       return "Erro";
-    case "not_released":
-      return "Não liberado";
+    case "already_has_access":
+      return "Já possui acesso";
+    case "not_found":
+      return "Não encontrado";
   }
 };
 
