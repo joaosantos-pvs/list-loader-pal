@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CheckCircle, XCircle, Ban } from "lucide-react";
+import { CheckCircle, XCircle, Ban, Search } from "lucide-react";
 import { HistoryEntry, CSVDetailEntry } from "@/contexts/HistoryContext";
 
 interface CSVDetailModalProps {
