@@ -212,8 +212,11 @@ export const HistoryProvider = ({ children }: { children: ReactNode }) => {
                 return { ...d, status: "error" as const, motivo: "Nome inválido" };
               }
               // Random chance of not_released for demo
-              if (Math.random() < 0.15) {
-                return { ...d, status: "not_released" as const, motivo: "Já possui acesso" };
+              if (Math.random() < 0.1) {
+                return { ...d, status: "already_has_access" as const, motivo: "Já possui acesso" };
+              }
+              if (Math.random() < 0.1) {
+                return { ...d, status: "not_found" as const, motivo: "Colaborador não encontrado na base" };
               }
               return { ...d, status: "success" as const };
             });
