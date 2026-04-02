@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useRef, ReactNode } from "react";
 
-export type ProcessingStatus = "success" | "error" | "not_released" | "pending";
+export type ProcessingStatus = "success" | "error" | "already_has_access" | "not_found" | "pending";
 
 export interface CSVDetailEntry {
   nome: string;
