@@ -55,7 +55,8 @@ const HistoryFilters = ({
             <SelectItem value="all">Todos os status</SelectItem>
             <SelectItem value="success">Sucesso</SelectItem>
             <SelectItem value="error">Erro</SelectItem>
-            <SelectItem value="not_released">Não liberado</SelectItem>
+            <SelectItem value="already_has_access">Já possui acesso</SelectItem>
+            <SelectItem value="not_found">Não encontrado</SelectItem>
           </SelectContent>
         </Select>
       </div>
