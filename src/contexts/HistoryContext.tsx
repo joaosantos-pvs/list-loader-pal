@@ -240,7 +240,7 @@ export const HistoryProvider = ({ children }: { children: ReactNode }) => {
             };
           } else {
             // Individual entry - simulate random result
-            const outcomes = ["success", "error", "not_released"] as const;
+            const outcomes = ["success", "error", "already_has_access", "not_found"] as const;
             const result = outcomes[Math.floor(Math.random() * outcomes.length)];
             return { ...entry, status: result };
           }
