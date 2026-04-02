@@ -233,17 +233,6 @@ const History = () => {
             <TooltipContent>Detalhes</TooltipContent>
           </Tooltip>
 
-          {(entry.errorCount ?? 0) > 0 && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleReprocess(entry.id)}>
-                  <RefreshCw className="w-4 h-4 text-amber-500" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Reprocessar</TooltipContent>
-            </Tooltip>
-          )}
-
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDownloadResult(entry)}>
@@ -265,17 +254,8 @@ const History = () => {
       );
     }
 
-    // Individual entry actions
-    if (entry.status === "error") {
-      return (
-        <div className="flex items-center justify-center">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleReprocess(entry.id)}>
-                <RefreshCw className="w-4 h-4 text-amber-500" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Reprocessar</TooltipContent>
+    return <span className="text-xs text-muted-foreground">—</span>;
+  };
           </Tooltip>
         </div>
       );
