@@ -191,13 +191,22 @@ const History = () => {
             <TooltipContent>Erro</TooltipContent>
           </Tooltip>
         );
-      case "not_released":
+      case "already_has_access":
         return (
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center justify-center"><Ban className="w-5 h-5 text-muted-foreground" /></div>
             </TooltipTrigger>
-            <TooltipContent>Não liberado (já possui acesso)</TooltipContent>
+            <TooltipContent>Já possui acesso</TooltipContent>
+          </Tooltip>
+        );
+      case "not_found":
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center justify-center"><Search className="w-5 h-5 text-amber-500" /></div>
+            </TooltipTrigger>
+            <TooltipContent>Não encontrado / inválido</TooltipContent>
           </Tooltip>
         );
       case "pending":
