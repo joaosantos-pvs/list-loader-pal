@@ -21,7 +21,7 @@ import {
   CheckCircle,
   XCircle,
   Ban,
-  RefreshCw,
+  Search,
   Download,
   Info,
   Users,
