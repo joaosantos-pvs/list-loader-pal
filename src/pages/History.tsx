@@ -86,9 +86,6 @@ const History = () => {
     history.filter((e) => e.status === "pending")
   );
 
-  const handleReprocess = (id: string) => {
-    updateEntryStatus(id, "success");
-  };
 
   const handleDownloadResult = (entry: HistoryEntry) => {
     const details = entry.csvDetails || [];
