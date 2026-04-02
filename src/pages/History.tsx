@@ -34,7 +34,7 @@ import HistoryFilters from "@/components/HistoryFilters";
 import CSVDetailModal from "@/components/CSVDetailModal";
 
 const History = () => {
-  const { history, updateEntryStatus } = useHistory();
+  const { history } = useHistory();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("individual");
