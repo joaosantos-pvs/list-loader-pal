@@ -235,7 +235,8 @@ export const HistoryProvider = ({ children }: { children: ReactNode }) => {
               csvDetails: processedDetails,
               successCount,
               errorCount,
-              notReleasedCount,
+              alreadyHasAccessCount,
+              notFoundCount,
             };
           } else {
             // Individual entry - simulate random result
