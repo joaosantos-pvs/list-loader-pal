@@ -256,13 +256,6 @@ const History = () => {
 
     return <span className="text-xs text-muted-foreground">—</span>;
   };
-          </Tooltip>
-        </div>
-      );
-    }
-
-    return <span className="text-xs text-muted-foreground">—</span>;
-  };
 
   const renderTable = (entries: HistoryEntry[], isPending: boolean) => {
     if (entries.length === 0) {
