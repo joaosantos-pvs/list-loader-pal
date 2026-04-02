@@ -185,10 +185,11 @@ export const HistoryProvider = ({ children }: { children: ReactNode }) => {
         totalRecords: 2,
         successCount: 1,
         errorCount: 0,
-        notReleasedCount: 1,
+        alreadyHasAccessCount: 1,
+        notFoundCount: 0,
         csvDetails: [
           { nome: "Vinícius Barros", status: "success" as ProcessingStatus },
-          { nome: "Isabela Campos", status: "not_released" as ProcessingStatus, motivo: "Já possui acesso" },
+          { nome: "Isabela Campos", status: "already_has_access" as ProcessingStatus, motivo: "Já possui acesso" },
         ],
       },
     ];
