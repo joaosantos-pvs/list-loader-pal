@@ -63,7 +63,7 @@ const CSVDetailModal = ({ entry, open, onOpenChange }: CSVDetailModalProps) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-4 gap-3 my-4">
+        <div className="grid grid-cols-5 gap-3 my-4">
           <div className="bg-muted rounded-lg p-3 text-center">
             <p className="text-2xl font-bold text-foreground">{entry.totalRecords ?? 0}</p>
             <p className="text-xs text-muted-foreground">Enviados</p>
