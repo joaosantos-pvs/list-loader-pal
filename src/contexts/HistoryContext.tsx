@@ -141,7 +141,8 @@ export const HistoryProvider = ({ children }: { children: ReactNode }) => {
         totalRecords: 3,
         successCount: 3,
         errorCount: 0,
-        notReleasedCount: 0,
+        alreadyHasAccessCount: 0,
+        notFoundCount: 0,
         csvDetails: [
           { nome: "Thiago Martins", status: "success" as ProcessingStatus },
           { nome: "Juliana Pereira", status: "success" as ProcessingStatus },

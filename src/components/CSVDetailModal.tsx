@@ -77,8 +77,12 @@ const CSVDetailModal = ({ entry, open, onOpenChange }: CSVDetailModalProps) => {
             <p className="text-xs text-muted-foreground">Erros</p>
           </div>
           <div className="bg-muted rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold text-muted-foreground">{entry.notReleasedCount ?? 0}</p>
-            <p className="text-xs text-muted-foreground">Não liberados</p>
+            <p className="text-2xl font-bold text-muted-foreground">{entry.alreadyHasAccessCount ?? 0}</p>
+            <p className="text-xs text-muted-foreground">Já possui acesso</p>
+          </div>
+          <div className="bg-muted rounded-lg p-3 text-center">
+            <p className="text-2xl font-bold text-amber-500">{entry.notFoundCount ?? 0}</p>
+            <p className="text-xs text-muted-foreground">Não encontrados</p>
           </div>
         </div>
 
