@@ -23,7 +23,8 @@ export interface HistoryEntry {
   totalRecords?: number;
   successCount?: number;
   errorCount?: number;
-  notReleasedCount?: number;
+  alreadyHasAccessCount?: number;
+  notFoundCount?: number;
   csvDetails?: CSVDetailEntry[];
 }
 
