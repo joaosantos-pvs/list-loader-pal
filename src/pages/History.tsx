@@ -21,7 +21,6 @@ import {
   CheckCircle,
   XCircle,
   Ban,
-  Search,
   Download,
   Info,
   Users,
@@ -188,22 +187,13 @@ const History = () => {
             <TooltipContent>Erro</TooltipContent>
           </Tooltip>
         );
-      case "already_has_access":
+      case "not_released":
         return (
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center justify-center"><Ban className="w-5 h-5 text-muted-foreground" /></div>
             </TooltipTrigger>
-            <TooltipContent>Já possui acesso</TooltipContent>
-          </Tooltip>
-        );
-      case "not_found":
-        return (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center justify-center"><Search className="w-5 h-5 text-amber-500" /></div>
-            </TooltipTrigger>
-            <TooltipContent>Não encontrado / inválido</TooltipContent>
+            <TooltipContent>Não liberado</TooltipContent>
           </Tooltip>
         );
       case "pending":
