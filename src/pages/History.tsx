@@ -26,6 +26,7 @@ import {
   Users,
   Loader2,
 } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import AppSidebar from "@/components/AppSidebar";
 import { Button } from "@/components/ui/button";
@@ -315,6 +316,14 @@ const History = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Histórico de Liberações — PortalWeb</title>
+        <meta name="description" content="Acompanhe o histórico de liberações de acesso ao Zendesk: status, responsáveis, grupos e detalhes de cada envio individual ou via CSV." />
+        <link rel="canonical" href="https://list-loader-pal.lovable.app/historico" />
+        <meta property="og:title" content="Histórico de Liberações — PortalWeb" />
+        <meta property="og:description" content="Auditoria completa das liberações de acesso ao Zendesk, com filtros por status, tipo e data." />
+        <meta property="og:url" content="https://list-loader-pal.lovable.app/historico" />
+      </Helmet>
       <Header onMenuClick={() => setSidebarOpen(true)} />
       <AppSidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
 
