@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://list-loader-pal.lovable.app/sitemap.xml

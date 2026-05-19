@@ -1,0 +1,8 @@
+# PortalWeb — Liberação de Acessos ao Zendesk
+
+> Plataforma interna da Prevent Senior para liberar acessos ao Zendesk, gerenciar grupos e acompanhar o histórico de liberações.
+
+## Pages
+
+- [Liberar Acesso ao Zendesk](/): fluxo guiado em 3 passos para liberar acessos individuais ou em lote via CSV.
+- [Histórico de Liberações](/historico): auditoria das liberações com filtros por status, tipo e data.
