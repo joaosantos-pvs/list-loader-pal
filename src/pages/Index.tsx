@@ -234,7 +234,7 @@ const Index = () => {
 
         <p className="text-xs text-muted-foreground mt-6">
           Usuários cujo status esteja como{" "}
-          <span className="text-amber-500 font-medium">'em processamento'</span> ou{" "}
+          <span className="text-amber-700 dark:text-amber-400 font-medium">'em processamento'</span> ou{" "}
           <span className="text-destructive font-medium">'erro'</span>, ou que não tenham a
           função de 'Usuário Final', não serão processados.
         </p>
