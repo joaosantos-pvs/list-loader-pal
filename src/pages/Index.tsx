@@ -224,24 +224,21 @@ const Index = () => {
                 />
 
                 {selectedAccess === "agente_full_sem" && (
-                  <div className="rounded-lg border border-border bg-muted/30 p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-sm font-semibold text-foreground">Módulo de Chat</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Libere automaticamente o módulo de chat no Zendesk para colaboradores que vão atender tickets de WhatsApp, evitando a liberação manual.
-                        </p>
-                      </div>
-                      <Button
-                        type="button"
-                        variant={chatModule ? "default" : "outline"}
-                        onClick={() => setChatModule((v) => !v)}
-                        className={chatModule ? "" : "border-border"}
-                      >
-                        <MessageSquare className="w-4 h-4 mr-2" />
-                        {chatModule ? "Módulo de Chat selecionado" : "Módulo de Chat"}
-                      </Button>
-                    </div>
+                  <div className="inline-flex flex-col items-start gap-1.5">
+                    <span className="text-xs font-medium text-foreground">Módulo de Chat</span>
+                    <button
+                      type="button"
+                      onClick={() => setChatModule((v) => !v)}
+                      aria-pressed={chatModule}
+                      title="Módulo de Chat"
+                      className={`w-12 h-12 rounded-md border flex items-center justify-center transition-colors ${
+                        chatModule
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background text-muted-foreground border-border hover:bg-accent"
+                      }`}
+                    >
+                      <MessageSquare className="w-5 h-5" />
+                    </button>
                   </div>
                 )}
               </>
