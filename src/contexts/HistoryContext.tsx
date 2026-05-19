@@ -25,6 +25,7 @@ export interface HistoryEntry {
   errorCount?: number;
   notReleasedCount?: number;
   csvDetails?: CSVDetailEntry[];
+  chatModule?: boolean;
 }
 
 interface HistoryContextType {

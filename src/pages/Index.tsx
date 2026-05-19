@@ -11,7 +11,7 @@ import MirrorUserSelector from "@/components/MirrorUserSelector";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import SummaryStep from "@/components/SummaryStep";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, Home } from "lucide-react";
+import { ArrowRight, ArrowLeft, Home, MessageSquare } from "lucide-react";
 import { AccessType, accessOptions } from "@/data/accessOptions";
 import { Collaborator } from "@/data/collaborators";
 import { useHistory } from "@/contexts/HistoryContext";
@@ -50,6 +50,7 @@ const Index = () => {
   const [csvFile, setCsvFile] = useState<CSVFile | null>(null);
   const [selectedAccess, setSelectedAccess] = useState<AccessType | "">("");
   const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
+  const [chatModule, setChatModule] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -102,6 +103,7 @@ const Index = () => {
         grupos: selectedGroups,
         quemLiberou: "Usuário Atual",
         status: "pending" as const,
+        chatModule: selectedAccess === "agente_full_sem" ? chatModule : undefined,
       });
     }
 
@@ -126,6 +128,7 @@ const Index = () => {
         errorCount: 0,
         notReleasedCount: 0,
         csvDetails,
+        chatModule: selectedAccess === "agente_full_sem" ? chatModule : undefined,
       });
     }
 
@@ -148,6 +151,7 @@ const Index = () => {
     setCsvFile(null);
     setSelectedAccess("");
     setSelectedGroups([]);
+    setChatModule(false);
   };
 
   const handleMergeGroups = (groups: SelectedGroup[]) => {
@@ -218,6 +222,28 @@ const Index = () => {
                   selectedGroups={selectedGroups}
                   onMergeGroups={handleMergeGroups}
                 />
+
+                {selectedAccess === "agente_full_sem" && (
+                  <div className="rounded-lg border border-border bg-muted/30 p-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">Módulo de Chat</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Libere automaticamente o módulo de chat no Zendesk para colaboradores que vão atender tickets de WhatsApp, evitando a liberação manual.
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant={chatModule ? "default" : "outline"}
+                        onClick={() => setChatModule((v) => !v)}
+                        className={chatModule ? "" : "border-border"}
+                      >
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        {chatModule ? "Módulo de Chat selecionado" : "Módulo de Chat"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -229,6 +255,7 @@ const Index = () => {
             csvFile={csvFile}
             selectedAccess={selectedAccess as AccessType}
             selectedGroups={selectedGroups}
+            chatModule={chatModule}
           />
         )}
 
