@@ -1,4 +1,4 @@
-import { User, MinusCircle, FileText, Loader2 } from "lucide-react";
+import { User, MinusCircle, FileText, Loader2, MessageSquare } from "lucide-react";
 import { accessOptions, AccessType } from "@/data/accessOptions";
 
 interface Collaborator {
@@ -23,9 +23,10 @@ interface SummaryStepProps {
   csvFile: CSVFile | null;
   selectedAccess: AccessType;
   selectedGroups: SelectedGroup[];
+  chatModule?: boolean;
 }
 
-const SummaryStep = ({ collaborators, csvFile, selectedAccess, selectedGroups }: SummaryStepProps) => {
+const SummaryStep = ({ collaborators, csvFile, selectedAccess, selectedGroups, chatModule }: SummaryStepProps) => {
   const accessLabel = accessOptions.find(a => a.value === selectedAccess)?.label || selectedAccess;
   
   const groupsDisplay = selectedGroups
@@ -43,6 +44,18 @@ const SummaryStep = ({ collaborators, csvFile, selectedAccess, selectedGroups }:
           <span className="text-sm font-semibold text-foreground">Grupos Selecionados: </span>
           <span className="text-sm text-muted-foreground">{groupsDisplay}</span>
         </div>
+        {selectedAccess === "agente_full_sem" && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-foreground">Módulo de Chat:</span>
+            {chatModule ? (
+              <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+                <MessageSquare className="w-4 h-4" /> Liberado automaticamente
+              </span>
+            ) : (
+              <span className="text-sm text-muted-foreground">Não selecionado</span>
+            )}
+          </div>
+        )}
       </div>
 
       <table className="w-full">
