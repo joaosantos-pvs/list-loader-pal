@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import AppSidebar from "@/components/AppSidebar";
 import StepIndicator from "@/components/StepIndicator";
@@ -158,6 +159,14 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Liberar Acesso ao Zendesk — PortalWeb</title>
+        <meta name="description" content="Selecione colaboradores, defina função e grupos e libere acessos ao Zendesk de forma rápida, individual ou em lote via CSV." />
+        <link rel="canonical" href="https://list-loader-pal.lovable.app/" />
+        <meta property="og:title" content="Liberar Acesso ao Zendesk — PortalWeb" />
+        <meta property="og:description" content="Fluxo guiado em 3 passos para liberar acessos ao Zendesk com segurança e rastreabilidade." />
+        <meta property="og:url" content="https://list-loader-pal.lovable.app/" />
+      </Helmet>
       <Header onMenuClick={() => setSidebarOpen(true)} />
       <AppSidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
       
