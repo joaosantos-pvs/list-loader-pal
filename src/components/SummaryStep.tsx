@@ -86,7 +86,7 @@ const SummaryStep = ({ collaborators, csvFile, selectedAccess, selectedGroups }:
               <td className="py-3 px-4 text-center">
                 <div className="flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 text-amber-500 animate-spin" />
-                  <span className="text-xs text-amber-500 font-medium">Em processamento</span>
+                  <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">Em processamento</span>
                 </div>
               </td>
             </tr>
