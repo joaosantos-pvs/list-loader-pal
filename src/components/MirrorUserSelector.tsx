@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { mirrorUsers } from "@/data/mirrorUsers";
+import { toast } from "sonner";
 
 interface SelectedGroup {
   name: string;
@@ -11,11 +12,15 @@ interface SelectedGroup {
 interface MirrorUserSelectorProps {
   selectedGroups: SelectedGroup[];
   onMergeGroups: (groups: SelectedGroup[]) => void;
+  mirrorUserSelected: boolean;
+  onMirrorUserSelected: () => void;
 }
 
 const MirrorUserSelector = ({
   selectedGroups,
   onMergeGroups,
+  mirrorUserSelected,
+  onMirrorUserSelected,
 }: MirrorUserSelectorProps) => {
   const [searchValue, setSearchValue] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -32,6 +37,12 @@ const MirrorUserSelector = ({
   }, [searchValue]);
 
   const handleSelectUser = (user: typeof mirrorUsers[0]) => {
+    if (mirrorUserSelected) {
+      toast.error("Um usuário espelho já foi selecionado anteriormente. Só é possível utilizar um usuário espelho.");
+      setSearchValue("");
+      setShowDropdown(false);
+      return;
+    }
     // Merge grupos do usuário espelho com os grupos já selecionados
     const existingGroupNames = selectedGroups.map((g) => g.name);
     const hasDefault = selectedGroups.some((g) => g.isDefault);
@@ -44,7 +55,8 @@ const MirrorUserSelector = ({
       }));
     
     onMergeGroups([...selectedGroups, ...newGroups]);
-    
+    onMirrorUserSelected();
+
     setSearchValue("");
     setShowDropdown(false);
   };
@@ -59,7 +71,7 @@ const MirrorUserSelector = ({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar usuário espelho por nome ou CPF"
+            placeholder={mirrorUserSelected ? "Usuário espelho já selecionado" : "Buscar usuário espelho por nome ou CPF"}
             value={searchValue}
             onChange={(e) => {
               setSearchValue(e.target.value);
@@ -67,6 +79,7 @@ const MirrorUserSelector = ({
             }}
             onFocus={() => setShowDropdown(true)}
             className="pl-10 bg-card border-border"
+            disabled={mirrorUserSelected}
           />
         </div>
 
@@ -106,7 +119,7 @@ const MirrorUserSelector = ({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Selecione um usuário que já possui acesso para copiar seus grupos automaticamente.
+        Selecione um usuário que já possui acesso para copiar seus grupos automaticamente. Apenas um usuário espelho pode ser utilizado.
       </p>
     </div>
   );
