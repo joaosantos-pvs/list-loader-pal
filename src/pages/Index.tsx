@@ -104,7 +104,7 @@ const Index = () => {
         grupos: selectedGroups,
         quemLiberou: "Usuário Atual",
         status: "pending" as const,
-        chatModule: selectedAccess === "agente_full_sem" ? chatModule : undefined,
+        chatModule: selectedAccess.startsWith("agente_full") ? chatModule : undefined,
       });
     }
 
@@ -129,7 +129,7 @@ const Index = () => {
         errorCount: 0,
         notReleasedCount: 0,
         csvDetails,
-        chatModule: selectedAccess === "agente_full_sem" ? chatModule : undefined,
+        chatModule: selectedAccess.startsWith("agente_full") ? chatModule : undefined,
       });
     }
 
