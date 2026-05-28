@@ -44,12 +44,16 @@ const SummaryStep = ({ collaborators, csvFile, selectedAccess, selectedGroups, c
           <span className="text-sm font-semibold text-foreground">Grupos Selecionados: </span>
           <span className="text-sm text-muted-foreground">{groupsDisplay}</span>
         </div>
-        {selectedAccess.startsWith("agente_full") && chatModule && (
+        {selectedAccess.startsWith("agente_full") && (
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-foreground">Módulo de Chat:</span>
-            <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
-              <MessageSquare className="w-4 h-4" /> Liberado
-            </span>
+            {chatModule ? (
+              <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+                <MessageSquare className="w-4 h-4" /> Liberado
+              </span>
+            ) : (
+              <span className="text-sm text-muted-foreground">Não liberado</span>
+            )}
           </div>
         )}
       </div>
