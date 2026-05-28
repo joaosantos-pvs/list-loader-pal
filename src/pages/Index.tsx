@@ -51,6 +51,7 @@ const Index = () => {
   const [selectedAccess, setSelectedAccess] = useState<AccessType | "">("");
   const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
   const [chatModule, setChatModule] = useState(false);
+  const [mirrorUserSelected, setMirrorUserSelected] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -103,7 +104,7 @@ const Index = () => {
         grupos: selectedGroups,
         quemLiberou: "Usuário Atual",
         status: "pending" as const,
-        chatModule: selectedAccess === "agente_full_sem" ? chatModule : undefined,
+        chatModule: selectedAccess.startsWith("agente_full") ? chatModule : undefined,
       });
     }
 
@@ -128,7 +129,7 @@ const Index = () => {
         errorCount: 0,
         notReleasedCount: 0,
         csvDetails,
-        chatModule: selectedAccess === "agente_full_sem" ? chatModule : undefined,
+        chatModule: selectedAccess.startsWith("agente_full") ? chatModule : undefined,
       });
     }
 
@@ -152,6 +153,7 @@ const Index = () => {
     setSelectedAccess("");
     setSelectedGroups([]);
     setChatModule(false);
+    setMirrorUserSelected(false);
   };
 
   const handleMergeGroups = (groups: SelectedGroup[]) => {
@@ -221,16 +223,18 @@ const Index = () => {
                 <MirrorUserSelector
                   selectedGroups={selectedGroups}
                   onMergeGroups={handleMergeGroups}
+                  mirrorUserSelected={mirrorUserSelected}
+                  onMirrorUserSelected={() => setMirrorUserSelected(true)}
                 />
 
-                {selectedAccess === "agente_full_sem" && (
+                {selectedAccess.startsWith("agente_full") && (
                   <div className="inline-flex flex-col items-start gap-1.5">
-                    <span className="text-xs font-medium text-foreground">Módulo de Chat</span>
+                    <span className="text-xs font-medium text-foreground">Módulo Chat</span>
                     <button
                       type="button"
                       onClick={() => setChatModule((v) => !v)}
                       aria-pressed={chatModule}
-                      title="Módulo de Chat"
+                      title="Módulo Chat"
                       className={`w-12 h-12 rounded-md border flex items-center justify-center transition-colors ${
                         chatModule
                           ? "bg-primary text-primary-foreground border-primary"
