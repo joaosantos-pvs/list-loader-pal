@@ -218,6 +218,7 @@ const Index = () => {
                 <GroupSelector
                   selectedGroups={selectedGroups}
                   onGroupsChange={setSelectedGroups}
+                  onClearAll={() => setMirrorUserSelected(false)}
                 />
 
                 <MirrorUserSelector
