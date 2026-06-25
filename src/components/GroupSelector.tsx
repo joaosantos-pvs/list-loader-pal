@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Trash2, Users, Search } from "lucide-react";
+import { Trash2, Users, Search, Eraser } from "lucide-react";
 import { groups } from "@/data/accessOptions";
 
 interface SelectedGroup {
@@ -20,9 +20,10 @@ interface SelectedGroup {
 interface GroupSelectorProps {
   selectedGroups: SelectedGroup[];
   onGroupsChange: (groups: SelectedGroup[]) => void;
+  onClearAll?: () => void;
 }
 
-const GroupSelector = ({ selectedGroups, onGroupsChange }: GroupSelectorProps) => {
+const GroupSelector = ({ selectedGroups, onGroupsChange, onClearAll }: GroupSelectorProps) => {
   const [searchValue, setSearchValue] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -114,6 +115,22 @@ const GroupSelector = ({ selectedGroups, onGroupsChange }: GroupSelectorProps) =
       </p>
 
       {selectedGroups.length > 0 && (
+        <>
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              onGroupsChange([]);
+              onClearAll?.();
+            }}
+            className="h-8 text-xs"
+          >
+            <Eraser className="w-3.5 h-3.5 mr-1.5" />
+            Limpar grupos
+          </Button>
+        </div>
         <Table>
           <TableHeader>
             <TableRow className="border-border hover:bg-transparent">
@@ -163,6 +180,7 @@ const GroupSelector = ({ selectedGroups, onGroupsChange }: GroupSelectorProps) =
             ))}
           </TableBody>
         </Table>
+        </>
       )}
     </div>
   );
