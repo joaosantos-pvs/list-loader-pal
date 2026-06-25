@@ -16,6 +16,14 @@ export const mirrorUsers: MirrorUser[] = [
     ],
   },
   {
+    nome: "Piercarlos Ronaldos Vinco",
+    cpf: "111.222.987-65",
+    grupos: [
+      "Agendamento de Exames Nucleos - SP",
+      "Reabilitação - Supervisão",
+    ],
+  },
+  {
     nome: "Roberto Carlos Silva",
     cpf: "222.333.444-55",
     grupos: [
